@@ -1,0 +1,142 @@
+<meta property="og:title"
+      content="ふるさと納税 控除上限かんたんシミュレーター">
+
+<meta property="og:description"
+      content="収入ではなく住民税額などから、なるべく正確にふるさと納税の控除上限目安額を簡易計算します。">
+
+<meta property="og:type"
+      content="website">
+
+<div class="fz">
+  <h2>ふるさと納税 控除上限シミュレーター</h2>
+  <p class="lead">確定申告で寄附金控除を受ける場合の目安額を計算します。</p>
+
+  <label class="row">
+    <span class="lbl">今年度の住民税額（年額）</span>
+    <span class="in"><input id="tax" type="text" inputmode="numeric" placeholder="例：305,000"><em>円</em></span>
+    <small>住民税決定通知書の年税額（均等割を含む）</small>
+  </label>
+
+  <label class="row">
+    <span class="lbl">前年に寄附したふるさと納税の合計</span>
+    <span class="in"><input id="prev" type="text" inputmode="numeric" placeholder="例：60,000"><em>円</em></span>
+    <small>寄附していなければ 0</small>
+  </label>
+
+  <div class="two">
+    <label class="row">
+      <span class="lbl">前年分の所得税率</span>
+      <select id="t8"></select>
+    </label>
+    <label class="row">
+      <span class="lbl">今年分の所得税率（見込み）</span>
+      <select id="t9"></select>
+    </label>
+  </div>
+
+  <details>
+    <summary>詳細設定</summary>
+    <label class="row">
+      <span class="lbl">均等割の合計</span>
+      <span class="in"><input id="kin" type="text" inputmode="numeric" value="5,000"><em>円</em></span>
+      <small>標準は5,000円（市町村民税3,000＋道府県民税1,000＋森林環境税1,000）。県独自の上乗せがある場合は変更してください。</small>
+    </label>
+    <label class="row">
+      <span class="lbl">住宅ローン控除（住民税分）</span>
+      <span class="in"><input id="house" type="text" inputmode="numeric" value="0"><em>円</em></span>
+      <small>決定通知書の「住宅借入金等特別税額控除額」。なければ 0</small>
+    </label>
+  </details>
+
+  <button id="calc" type="button">計算する</button>
+
+  <div id="err" class="err" hidden></div>
+
+  <div id="res" class="res" hidden>
+    <div class="res-lbl">控除上限の目安</div>
+    <div class="res-num"><span id="out">0</span> 円</div>
+    <div class="res-sub">安全側に1,000円未満切り捨て：<b id="out2">0</b> 円</div>
+    <table>
+      <tr><td>前年分ふるさと納税の足し戻し</td><td id="r1"></td></tr>
+      <tr><td>住民税所得割額（推計）</td><td id="r2"></td></tr>
+      <tr><td>特例控除の上限（所得割×20%）</td><td id="r3"></td></tr>
+    </table>
+  </div>
+
+  <p class="note">※ 今年の所得が前年とほぼ同じである前提の目安です。収入が減りそうな場合は余裕を持たせてください。</p>
+</div>
+
+<style>
+  .fz{--ink:#222;--sub:#666;--line:#ddd;--accent:#2b8a6e;--bg:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+      color:var(--ink);background:var(--bg);max-width:520px;margin:0 auto;padding:16px;box-sizing:border-box;line-height:1.5}
+  .fz *{box-sizing:border-box}
+  .fz h2{font-size:18px;margin:0 0 4px}
+  .fz .lead{font-size:13px;color:var(--sub);margin:0 0 14px}
+  .fz .row{display:block;margin-bottom:12px}
+  .fz .lbl{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+  .fz .in{display:flex;align-items:center;gap:6px}
+  .fz .in em{font-style:normal;font-size:13px;color:var(--sub)}
+  .fz input,.fz select{width:100%;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+  .fz input{text-align:right}
+  .fz input:focus,.fz select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+  .fz small{display:block;font-size:11px;color:var(--sub);margin-top:3px}
+  .fz .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fz details{margin:2px 0 12px;font-size:13px}
+  .fz summary{cursor:pointer;color:var(--accent);margin-bottom:8px}
+  .fz button{width:100%;font-size:16px;font-weight:700;padding:11px;border:0;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer}
+  .fz button:active{opacity:.85}
+  .fz .err{margin-top:12px;padding:10px;border-radius:6px;background:#fdecec;color:#a33;font-size:13px}
+  .fz .res{margin-top:14px;padding:14px;border-radius:8px;background:#eef7f3}
+  .fz .res-lbl{font-size:13px;color:var(--sub)}
+  .fz .res-num{font-size:26px;font-weight:700;color:var(--accent)}
+  .fz .res-num span{font-variant-numeric:tabular-nums}
+  .fz .res-sub{font-size:13px;margin-bottom:8px}
+  .fz table{width:100%;border-collapse:collapse;font-size:12px}
+  .fz td{padding:4px 0;border-top:1px solid #d5e8df}
+  .fz td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+  .fz .note{font-size:11px;color:var(--sub);margin:12px 0 0}
+</style>
+
+<script>
+(function(){
+  var rates=[["0","0%（所得税なし）"],["0.05","5%"],["0.1","10%"],["0.2","20%"],["0.23","23%"],["0.33","33%"],["0.4","40%"],["0.45","45%"]];
+  ["t8","t9"].forEach(function(id){
+    var s=document.getElementById(id);
+    rates.forEach(function(r){var o=document.createElement("option");o.value=r[0];o.textContent=r[1];s.appendChild(o);});
+    s.value="0.2";
+  });
+
+  function num(id){
+    var v=document.getElementById(id).value.replace(/[,，\s円]/g,"").replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0);});
+    return v===""?NaN:Number(v);
+  }
+  function yen(n){return Math.round(n).toLocaleString("ja-JP");}
+
+  document.querySelectorAll(".fz input").forEach(function(el){
+    el.addEventListener("blur",function(){var n=num(el.id);if(!isNaN(n))el.value=n.toLocaleString("ja-JP");});
+  });
+
+  document.getElementById("calc").addEventListener("click",function(){
+    var err=document.getElementById("err"),res=document.getElementById("res");
+    err.hidden=true;res.hidden=true;
+    var tax=num("tax"),prev=num("prev"),kin=num("kin"),house=num("house");
+    if(isNaN(prev))prev=0; if(isNaN(kin))kin=5000; if(isNaN(house))house=0;
+    var t8=Number(document.getElementById("t8").value),t9=Number(document.getElementById("t9").value);
+    if(isNaN(tax)||tax<=0){err.textContent="今年度の住民税額を入力してください。";err.hidden=false;return;}
+
+    var back=Math.max((prev-2000)*(1-t8*1.021),0);
+    var base=tax-kin+house+back;
+    if(base<=0){err.textContent="住民税所得割額が0以下になるため、控除上限は計算できません（実質2,000円を超える寄附は自己負担になります）。";err.hidden=false;return;}
+    var cap=base*0.2;
+    var limit=cap/(0.9-t9*1.021)+2000;
+
+    document.getElementById("out").textContent=yen(Math.floor(limit));
+    document.getElementById("out2").textContent=(Math.floor(limit/1000)*1000).toLocaleString("ja-JP");
+    document.getElementById("r1").textContent=yen(back)+" 円";
+    document.getElementById("r2").textContent=yen(base)+" 円";
+    document.getElementById("r3").textContent=yen(cap)+" 円";
+    res.hidden=false;
+  });
+})();
+</script>
